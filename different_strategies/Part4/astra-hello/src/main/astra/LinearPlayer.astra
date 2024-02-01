@@ -1,0 +1,38 @@
+agent LinearPlayer extends Player {
+
+    rule +!move(string T) : free(1) { !move(T, 1); }
+    rule +!move(string T) : free(2) { !move(T, 2); }
+    rule +!move(string T) : free(3) { !move(T, 3); }
+    rule +!move(string T) : free(4) { !move(T, 4); }
+    rule +!move(string T) : free(5) { !move(T, 5); }
+    rule +!move(string T) : free(6) { !move(T, 6); }
+    rule +!move(string T) : free(7) { !move(T, 7); }
+    rule +!move(string T) : free(8) { !move(T, 8); }
+    rule +!move(string T) : free(9) { !move(T, 9); }
+    
+    rule +!move(string T, int L) : free(L) & opponent(string T2) & turn(T) & ~played(T2, L) {
+        
+        
+        
+        C.println(T + " moving to " + L);
+        +played(T, L);
+        -free(L);        
+        -turn(T);
+
+
+        !DisplayGame("");
+        !winner(T);
+        !CheckDraw();
+
+        send(inform, T2, played(T, L));
+        send(request, T2, startTurn(T2));
+
+
+
+    }
+
+    rule +!move(string T, int L){
+        C.println("No moves left");
+    }
+
+}

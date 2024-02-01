@@ -1,0 +1,255 @@
+agent Player extends TicTacToe {
+
+    module Console C;
+    module System S;
+    // module Perlude perlude;
+
+    types P{
+        formula move(int);
+        formula move(string, int);
+        formula turn(string, boolean);
+        formula turn(string);
+        formula winner(string);
+        formula loser(string);
+        formula played(string, int);
+        formula token(string);
+        formula drawn(string);
+        formula line(int, int, int);
+        formula player(string);
+
+        formula opponent(string);
+        formula DisplayGame(string);
+        // formula free(int);
+
+       
+       
+
+    }
+
+
+    initial free(1);
+    initial free(2);
+    initial free(3);
+    initial free(4);
+    initial free(5);
+    initial free(6);
+    initial free(7);
+    initial free(8);
+    initial free(9);
+    
+
+
+
+    rule +!main([string token, boolean turn, string opponent]) {
+
+        +opponent(opponent);
+        +token(token);
+        +turn(token, turn);
+        if(turn == true){
+            +player(token);
+            +turn(token);
+        }
+        // playerTokken = tokken;
+        C.println(token);
+	    // send(request, server, get("beer"));
+	}
+    
+    rule +!turn(string Player)
+    {
+        +turn(Player);
+        C.println("It is " + Player + "'s turn");
+        !move(Player);
+        
+    }
+    rule +turn(string Player)
+    {
+        +turn(Player);
+        // C.println("It is " + Player + "'s turn");
+        !move(Player);
+    }
+
+
+
+
+
+    
+
+    
+   
+    rule @message(inform, string sender, played(string T, int L)) {
+        +played(T, L);
+        -free(L);
+        -turn(T);
+        
+
+    }
+    rule @message(inform, string sender, EndGame(string T)) {
+        C.println("Recieved message inform to END GAME ");
+        S.exit();
+        S.sleep(1000);
+       
+        
+
+    }
+
+
+    
+
+    rule @message(request, string sender, startTurn(string X)) {
+        // C.println("Recieved message request to startTurn " + X);
+        +turn(X);
+        // !move(X);
+
+        S.sleep(100);
+        // -player(X);
+        
+
+    }
+
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    rule +!CheckDraw() : ~free(1) & ~free(2) & ~free(3) & ~free(4) & ~free(5) & ~free(6) & ~free(7) & ~free(8) & ~free(9){
+        C.println("Game is drawn");
+        // string opp = perlude.ValueAsString(opponent);
+        // send(inform, oppenent, EndGame);
+    }
+    rule +!CheckDraw() {
+        // defualt
+    }
+
+
+
+    /* CHECK IF THE THERE IS A WINNER */
+    rule +!winner(string Player) : played(Player, 1) & played(Player, 2) & played(Player, 3){
+        +line(1,2, 3);
+        C.println("Game won by player " + Player);
+        if(Player == "O"){
+            C.println("Game lost by player " + "X");
+            send(inform, "X", EndGame("True"));
+
+        }else{
+            C.println("Game lost by player " + "O");
+        }
+
+    }
+    rule +!winner(string Player) : played(Player, 1) & played(Player, 5) & played(Player, 9){
+        +line(1, 5, 9);
+        C.println("Game won by player " + Player);
+        if(Player == "O"){
+            C.println("Game lost by player " + "X");
+            send(inform, "X", EndGame("True"));
+        }else{
+            C.println("Game lost by player " + "O");
+            send(inform, "O", EndGame("True"));
+
+        }
+    }   
+    rule +!winner(string Player) : played(Player, 1) & played(Player, 4) & played(Player, 7){
+        +line(1, 4, 7);
+        C.println("Game won by player " + Player);
+        if(Player == "O"){
+            C.println("Game lost by player " + "X");
+            send(inform, "X", EndGame("True"));
+        }else{
+            C.println("Game lost by player " + "O");
+            send(inform, "O", EndGame("True"));
+        }
+    }   
+    rule +!winner(string Player) : played(Player, 2) & played(Player, 5) & played(Player, 8){
+        +line(2, 5, 8);
+        C.println("Game won by player " + Player);
+        if(Player == "O"){
+            C.println("Game lost by player " + "X");
+    send(inform, "X", EndGame("True"));
+        }else{
+            C.println("Game lost by player " + "O");
+            send(inform, "O", EndGame("True"));
+        }
+    }
+    rule +!winner(string Player) : played(Player, 3) & played(Player, 5) & played(Player, 7){
+        +line(3, 5, 7);
+        C.println("Game won by player " + Player);
+        if(Player == "O"){
+            C.println("Game lost by player " + "X");
+            send(inform, "X", EndGame("True"));
+        }else{
+            C.println("Game lost by player " + "O");
+            send(inform, "O", EndGame("True"));
+        }
+    } 
+    rule +!winner(string Player) : played(Player, 4) & played(Player, 5) & played(Player, 6){
+        +line(4, 5, 6);
+        C.println("Game won by player " + Player);
+        if(Player == "O"){
+            C.println("Game lost by player " + "X");
+            send(inform, "X", EndGame("True"));
+        }else{
+            C.println("Game lost by player " + "O");
+            send(inform, "O", EndGame("True"));
+        }
+    } 
+    rule +!winner(string Player) : played(Player, 7) & played(Player, 8) & played(Player, 9){
+        +line(7, 8, 9);
+        C.println("Game won by player " + Player);
+        if(Player == "O"){
+            C.println("Game lost by player " + "X");
+            send(inform, "X", EndGame("True"));
+        }else{
+            C.println("Game lost by player " + "O");
+            send(inform, "O", EndGame("True"));
+        }
+    } 
+
+    rule +line(int a, int b, int c){
+        C.println("Winning line: " + a + " " + b + " " + c);
+        !DisplayGame("");
+    }
+
+    // Default
+    rule +!winner(string Player){
+        // not the winner
+    } 
+
+    rule +!DisplayGame(string board){
+        C.println("\n\n Game \n\n");
+        int i = 1;
+        int j = 0;
+        board = board + "\n";
+        while (i < 10) {
+            j = 0;
+            int index = i;
+            if(played("O", index )){
+
+                    board = board + "| "+ "O" + "|";
+                }
+            else if(played("X", index )){
+
+                    board = board + "| "+ "X" + "|";
+            }
+            else{
+                board = board + "| " + " "  + "|";
+            }
+            if(i%3 == 0){
+                board = board + "\n";
+            }
+
+            
+            i++;
+        }
+        C.println(board);
+    }
+
+
+    
+    
+     
+}

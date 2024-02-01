@@ -1,0 +1,9 @@
+agent Pong extends PingPong {
+    module System system;
+    module Console console;
+
+    rule @message(request, string sender, ping()) {
+        console.println("Pinged");
+        send(inform, sender, pong());
+    }
+}

@@ -1,0 +1,77 @@
+agent VacBot {
+         module EIS ei;
+         module Console C;
+         module Routing routing;
+
+        types bot {
+            formula task(string);
+            formula wonderaround();
+            formula update();
+            formula location(double, double);
+        }
+
+         rule +!main([string vacbot]) {
+             ei.join("hw");
+             ei.link(vacbot);
+             C.println("VacBot activated");
+
+             !task("clean");
+         }
+
+    rule +$ei.event(task("none")) { !task(string action); }
+    rule +$ei.event(location(double X, double y)) { !task(string action); }
+    
+    // clean if there is dust
+    rule +!task(string action) : ei.square("here", "dust") {
+        ei.clean();
+        action = "clean";
+       
+        C.println("Sucking dust");
+    }
+    rule +!task(string action) : ei.square("forward", "dust") {
+         ei.move("forward");
+         action = "move";
+         !update();
+         C.println(ei.getLocation());
+    }
+
+    rule +!task(string action) : ei.square("left", "dust") {
+         ei.move("left");
+         action = "move";
+    }
+
+    rule +!task(string action) : ei.square("right", "dust") {
+         ei.move("right");
+         action = "move";
+    }
+
+    rule +!task(string action) : ei.square("here", "empty") {
+        !wonderaround();
+
+         action = "wonderaround";
+    }
+
+    // Wonder around if there is no dust
+    rule +!wonderaround() : ei.square("forward", "empty") {
+        ei.move("forward");
+    }
+
+    rule +!wonderaround() : ei.square("left", "empty") {
+        ei.move("left");
+    }
+
+    rule +!wonderaround() : ei.square("right", "empty") {
+        ei.move("right");
+    }
+    rule +!task(string action){
+        // C.println("Task: " + action);
+    }
+
+     // Update
+    rule +!update() {
+        C.println(ei.getLocation());
+        // foreach(ei.square(string location, "obstacle") & ~routing.obstacle(X, Y, D, location)) {
+        //         routing.recordObstacle(X, Y, D, location);
+        //     }
+    }
+}

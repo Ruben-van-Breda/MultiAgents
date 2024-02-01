@@ -1,0 +1,41 @@
+agent Main {
+    module EIS ei;
+    module Console C;
+
+    types tower {
+        formula block(string);
+        formula free(string);
+    }
+
+    rule +!main(list args) {
+        ei.launch("hw","dependency/tower-1.3.0.jar");
+        ei.init();
+	    ei.start();
+
+	    // ei.join("hw");
+        ei.link("gripper");
+        
+
+        C.println("Press New Block until block d is created...");
+        wait(ei.block("d"));
+
+        C.println("You did it!");
+
+        ei.pickup("d");
+        wait(ei.holding("d"));
+
+        ei.putdown("d", "c");
+        wait(ei.on("d", "c"));
+    }
+
+  
+
+    rule +$ei.event(funct Y) {
+        C.println("Y: "+ Y);
+    }
+
+    rule +!pickup(string X) {
+        ei.pickup(X);
+        //...
+    }
+}

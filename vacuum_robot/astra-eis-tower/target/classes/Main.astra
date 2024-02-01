@@ -1,0 +1,34 @@
+agent Main {
+    module EIS ei;
+    module Console C;
+    module System S;
+    types tower {
+        formula block(string);
+        formula free(string);
+    }
+
+    rule +!main(list args) {
+        ei.launch("hw","dependency/vacuumworld-1.2.0.jar");
+        ei.init([generation("no"), level("4")]);
+	    
+        // Modify the Main.astra program to create the initial set of VacBots by inserting the following code 
+        // before the ei.start() action (and run the program again):
+        list entities = ei.freeEntities();
+        forall(string entity : entities) {
+            S.createAgent(entity, "VacBot");
+            S.setMainGoal(entity, [entity]);
+        }
+        ei.start();
+    }
+
+  
+
+    rule +$ei.event(funct Y) {
+        C.println("Y: "+ Y);
+    }
+
+    rule +!pickup(string X) {
+        ei.pickup(X);
+        //...
+    }
+}

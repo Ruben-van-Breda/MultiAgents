@@ -1,0 +1,28 @@
+agent TicTacToe {
+    types game {
+        formula startTurn(string);
+        formula endTurn(string);
+        formula free(int);
+        formula EndGame(string);
+        formula Play();
+    }
+
+    initial free(1);
+    initial free(2);
+    initial free(3);
+    initial free(4);
+    initial free(5);
+    initial free(6);
+    initial free(7);
+    initial free(8);
+    initial free(9);
+
+    rule  +!Play(){
+        
+
+    }
+
+    
+    
+
+}

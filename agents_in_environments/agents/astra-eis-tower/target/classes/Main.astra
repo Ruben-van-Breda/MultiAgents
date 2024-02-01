@@ -1,0 +1,221 @@
+agent Main {
+    module EIS ei;
+    module Console C;
+    module Prelude prelude;
+    module Math math;
+    module System S;
+
+    types tower {
+        // formula block(string);
+        formula free(string);
+        // formula tower(string, string, string);
+        // formula table(string);
+        // formula holding(string);
+        // formula on(string, string);
+    }
+
+    // inference tower(string A, string B, string C) :- ei.on(A, B) & ei.on(B, C) & ei.on(C, "table");
+    inference free(string X) :- ~ei.on(string Y, X);
+    inference free(string X) :- X == "table";
+
+    rule +!main(list args) {
+        ei.launch("hw","dependency/tower-1.3.0.jar");
+        ei.init();
+
+	    ei.start();
+        ei.link("gripper");
+
+        C.println("Press New Block until block g is created...");
+        wait(ei.block("g"));
+
+
+
+        int i = 0;
+        while(i < 5){
+            S.sleep(1000);
+            !random_tower();
+            S.sleep(2000);
+            i++;
+        }
+        C.println("All done!");
+
+        /*
+        
+        
+        C.println("\nBuilding tower: A B C D");
+        !tower(["a", "b", "c", "d"], 4);
+        C.println("\nBuilding tower: D A");
+        !tower(["d", "a"], 2);
+
+        C.println("Press New Block until block g is created...");
+        wait(ei.block("g"));
+        C.println("\nBuilding tower: A C E B G");
+        !tower(["a", "c", "e", "b", "g"], 5); 
+        */
+
+
+
+       
+
+
+    }
+
+  
+
+    rule +$ei.event(funct Y) {
+        C.println("Y: "+ Y);
+    }
+    rule +$ei.event(holding(string block)) {
+        C.println("holding: "+ block);
+    }
+
+    rule +!pickup(string target) : ei.on(string top, target){
+    
+        ei.pickup(top);
+        !on(top, "table");
+
+
+        //...
+    }
+    rule +!pickup(string X) {
+        ei.pickup(X);
+        //...
+    }
+
+    rule +!tower(list stack, int size) {
+        int i = size-1;
+        string current_block = prelude.valueAsString(stack, i);
+        C.println(current_block);
+        while(i >= 0){
+            current_block = prelude.valueAsString(stack, i);
+        //     if(i >= size - 2 ){
+        //         !holding(current_block); 
+        //         !on(current_block, "table");
+                
+        //         // i--;
+        //         // i--;
+
+        //     }
+            if (i < size-1){
+                int prev = i + 1;
+                string prev_block = prelude.valueAsString(stack, prev);
+                !holding(current_block); 
+                wait(ei.holding(current_block));
+                !on(current_block, prev_block);
+                wait(ei.on(current_block, prev_block));
+                // i--;
+            }
+            else{
+            C.println(prelude.valueAsString(stack, i));
+
+            }
+            i--;
+
+            
+        }
+    }
+
+    rule +!random_tower() {
+
+        int random_size = math.randomInt() % 7;
+        while(random_size < 3 | random_size > 5){
+             random_size = math.randomInt() % 7;
+        }
+        random_size++;
+
+
+        !shuffle(["a", "b", "c", "d", "e", "f", "g"], list OUT, random_size);
+        int i = 0;
+        list towerList = [];
+        while(i < random_size){
+            string block_string = prelude.valueAsString(OUT, i);
+            towerList = towerList + [block_string];
+            i++;
+
+        }
+
+        C.println("Building tower: " + towerList);
+        S.sleep(1000);
+
+        !tower(towerList, random_size);
+        S.sleep(1000);
+    }
+    // rule +!tower(string A, string B, string C) {
+    //     !holding(C); !on(C, "table");
+    //     !holding(B); !on(B, C);
+    //     !holding(A); !on(A, B);
+    // }
+
+    rule +!shuffle(list in, list out, int N) {
+          out = in;
+          int i=0;
+          while (i < N) { 
+              int j = math.randomInt() % prelude.size(out);
+              int k = math.randomInt() % prelude.size(out);
+              string temp = prelude.valueAsString(in, j);
+            //   out = prelude
+              prelude.swap(out, j, k);
+              i = i + 1;
+          }
+      }
+    
+    rule +!holding(string X) : ~ei.holding(string Y) & free(X) {
+        C.println("picking up: " + X);
+        ei.pickup(X);
+        wait(ei.holding(X));
+
+    }
+
+    rule +!holding(string X) : ~ei.holding(X) & ~free(X) & ei.on(string other, X) {
+        C.println("divert: picking up: " + other);
+        
+        !holding(other);
+        wait(ei.holding(other));
+        
+        C.println("putting down: " + other + " on: table");
+        ei.putdown(other, "table");
+        wait(ei.on(other, "table"));
+        
+        C.println("Picking up original goal block " + X);
+        ei.pickup(X);
+        wait(ei.holding(X));
+    }
+
+    rule +!holding(string X) : ~ei.holding(X) & ~free(X) & ~ei.on(X, "table") &  ei.on(string other2, string other) {
+        C.println("divert: picking up: " + other);
+        
+        !holding(other);
+        wait(ei.holding(other));
+        
+        C.println("putting down: " + other + " on: table");
+        ei.putdown(other, "table");
+        wait(ei.on(other, "table"));
+        
+        C.println("Picking up original goal block " + other2);
+        ei.pickup(other2);
+        wait(ei.holding(other2));
+    }
+
+    
+
+    rule +!holding(string X) : ~ei.holding(string Y) {
+        C.println("picking up: " + X);
+        ei.pickup(X);
+        wait(ei.holding(X));
+
+    }
+
+
+    rule +!on(string X, string Y) : ei.holding(X) & free(Y) {
+        C.println("putting: " + X + " on: " +Y);
+        ei.putdown(X, Y);
+        wait(ei.on(X, Y));
+
+    }
+
+    
+
+   
+
+
+}

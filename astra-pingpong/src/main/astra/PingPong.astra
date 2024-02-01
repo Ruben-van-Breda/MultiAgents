@@ -1,0 +1,6 @@
+agent PingPong {
+    types shared {
+        formula ping();
+        formula pong();
+    }
+}

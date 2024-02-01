@@ -1,0 +1,27 @@
+agent Main extends TicTacToe {
+    module Console console;
+    module System system;
+
+    
+
+    // initial player1;
+    rule +!main(list args) {
+        system.createAgent("O", "Better");
+        system.createAgent("X", "LinearPlayer");
+
+        system.setMainGoal("O", ["O", true, "X"]);
+        system.setMainGoal("X", ["X", false, "O"]);
+
+
+        // send(request, "O", startTurn("O"));
+
+        // system.sleep(1000);
+        // send(request, "player2", startTurn("X"));
+
+
+
+
+    }
+
+
+}
